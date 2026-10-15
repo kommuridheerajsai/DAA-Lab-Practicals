@@ -1,41 +1,47 @@
-def prim(graph):
-    n = len(graph)
-    selected = [False] * n
-    selected[0] = True
+import heapq
 
+def prims(graph, start):
+    visited = set()
     mst = []
+    min_heap = [(0, start, None)]
     total_cost = 0
 
-    for _ in range(n - 1):
-        min_weight = float('inf')
-        u = v = -1
+    while min_heap:
+        weight, node, parent = heapq.heappop(min_heap)
 
-        for i in range(n):
-            if selected[i]:
-                for j in range(n):
-                    if not selected[j] and graph[i][j] != 0:
-                        if graph[i][j] < min_weight:
-                            min_weight = graph[i][j]
-                            u = i
-                            v = j
+        if node in visited:
+            continue
 
-        selected[v] = True
-        mst.append((u, v, min_weight))
-        total_cost += min_weight
+        visited.add(node)
 
-    print("Edges in MST:")
-    for u, v, weight in mst:
-        print(u, "-", v, ":", weight)
+        if parent is not None:
+            mst.append((parent, node, weight))
+            total_cost += weight
+
+        for neighbor, edge_weight in graph[node]:
+            if neighbor not in visited:
+                heapq.heappush(
+                    min_heap,
+                    (edge_weight, neighbor, node)
+                )
+
+    if len(visited) != len(graph):
+        print("Graph is disconnected!")
+        return
+
+    print("Minimum Spanning Tree:")
+    for u, v, w in mst:
+        print(f"{u} - {v} : {w}")
 
     print("Total cost:", total_cost)
 
 
-graph = [
-    [0, 2, 0, 6, 0],
-    [2, 0, 3, 8, 5],
-    [0, 3, 0, 0, 7],
-    [6, 8, 0, 0, 9],
-    [0, 5, 7, 9, 0]
-]
+# Graph represented as an adjacency list
+graph = {
+    'A': [('B', 2), ('C', 3)],
+    'B': [('A', 2), ('C', 1), ('D', 4)],
+    'C': [('A', 3), ('B', 1), ('D', 5)],
+    'D': [('B', 4), ('C', 5)]
+}
 
-prim(graph)
+prims(graph, 'A')
